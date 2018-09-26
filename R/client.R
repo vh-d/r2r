@@ -131,15 +131,13 @@ test_remote <- function(socket = .socket) {
 #' @return
 #' @export
 stop_remote <- function(
-  socket = .socket,
-  address = "localhost",
-  port = 5555
+  socket = .socket
 ) {
   pbdZMQ::send.socket(data = list(command = "stop"), socket = socket)
   msg_pull <- pbdZMQ::receive.socket(socket = socket)
 
   if (is.character(msg_pull) && msg_pull == "ok") {
-    pbdZMQ::disconnect.socket(socket = socket, address = paste0("tcp://", address, ":", port))
+    pbdZMQ::zmq.close(socket = socket)
     return(TRUE)
   } else {
     return(FALSE)
