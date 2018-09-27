@@ -57,16 +57,18 @@ do.call_remote <- function(
   args_remote = NULL,
   args_local  = NULL,
   data        = list(),
+  quote       = FALSE,
   socket      = .r2r_socket
 ) {
 
   msg_push <-
     list(
       command     = "call",
-      what        = as.character(what)[1],
+      what        = if (quote) substitute(what) else as.character(what)[1],
       args_local  = args_local,
       args_remote = substitute(args_remote),
-      data        = data
+      data        = data,
+      quoted      = quote
     )
 
   # send message with data

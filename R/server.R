@@ -5,8 +5,6 @@
     message("\tdata",   str(msg$data))
   }
 
-  call_string <- as.character(msg$what)
-
   args_list <-
     c(
       list(),
@@ -27,7 +25,7 @@
   tryCatch(
     msg_push$result <-
       do.call(
-        what = call_string,
+        what = if (msg$quoted) eval(msg$what) else msg$what,
         args = args_list
       ),
 
