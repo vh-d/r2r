@@ -24,9 +24,23 @@ connect <- function(
 
   if (test_remote(socket = socket)) message("ok.") else warning("Testing connection failed.")
 
-  .GlobalEnv$.socket <- socket
-
   return(invisible(socket))
+}
+
+
+#' @export
+#' @rdname connect
+save_socket <- function(socket){
+    .GlobalEnv$.r2r_socket <- socket
+}
+
+
+#' @export
+#' @rdname connect
+connect_global <- function(...){
+  save_socket(
+    connect(...)
+  )
 }
 
 #' Remote query execution
@@ -43,7 +57,7 @@ do.call_remote <- function(
   args_remote = NULL,
   args_local  = NULL,
   data        = list(),
-  socket      = .socket
+  socket      = .r2r_socket
 ) {
 
   msg_push <-
@@ -88,7 +102,7 @@ eval_remote <- function(
   expr,
   data   = NULL,
   global = FALSE,
-  socket = .socket
+  socket = .r2r_socket
 ) {
 
   msg_push <-
@@ -117,7 +131,7 @@ eval_remote <- function(
 }
 
 
-test_remote <- function(socket = .socket) {
+test_remote <- function(socket = .r2r_socket) {
   pbdZMQ::send.socket(data = list(command = "test"), socket = socket)
   msg_pull <- pbdZMQ::receive.socket(socket = socket)
 
@@ -131,7 +145,7 @@ test_remote <- function(socket = .socket) {
 #' @return
 #' @export
 stop_remote <- function(
-  socket = .socket
+  socket = .r2r_socket
 ) {
   pbdZMQ::send.socket(data = list(command = "stop"), socket = socket)
   msg_pull <- pbdZMQ::receive.socket(socket = socket)
@@ -151,7 +165,7 @@ stop_remote <- function(
 #'
 #' @return
 # @export
-break_remote <- function(socket = .socket) {
+break_remote <- function(socket = .r2r_socket) {
   pbdZMQ::send.socket(data = list(command = "break"), socket = socket)
 
   msg_pull <- pbdZMQ::receive.socket(socket = socket)

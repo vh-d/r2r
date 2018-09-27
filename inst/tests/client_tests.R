@@ -10,4 +10,4 @@ eval_remote(a <- 1, global = TRUE)
 eval_remote(a+b, data = list(b = 20))
 
 
-#eval_remote(expr = library(package="data.table", logical.return = TRUE, verbose = TRUE), global = TRUE, socket = .socket)
+#eval_remote(expr = library(package="data.table", logical.return = TRUE, verbose = TRUE), global = TRUE, socket = .r2r_socket)
