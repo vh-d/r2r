@@ -61,6 +61,8 @@ connect_global <- function(...){
 #' @param command function to be called
 #' @param args_remote list of arguments that are passed as non-evaluated expression over the connection and evaluated on the server
 #' @param args_local list of arguments that are passed evaluated (e.g. data)
+#' @param data named list with data to be send to remote session for execution
+#' @param quote should be set TRUE when command is a character value
 #' @param socket connection
 #'
 #' @return whatever command call returns
