@@ -119,20 +119,20 @@ server <- function(
   port    = 5555,
   debug   = TRUE){
 
-  stopifnot(requireNamespace("pbdZMQ"))
+  stopifnot(requireNamespace("pbdZMQ", quietly = !debug))
 
-  message("Listening on ", address, ":", port, " ...", appendLF = FALSE)
+  if (isTRUE(debug)) message("Listening on ", address, ":", port, " ...", appendLF = FALSE)
 
   context = pbdZMQ::init.context()
   socket  = pbdZMQ::init.socket(context, "ZMQ_REP")
 
   # waith for socket connection from a client
-  if (pbdZMQ::bind.socket(socket, paste0(address, ":", port))) message("ok.")
+  if (pbdZMQ::bind.socket(socket, paste0(address, ":", port)) && isTRUE(debug)) message("ok.")
 
   # handle exit behaviour
   on.exit(
     {
-      message("Closing! \n")
+      if (isTRUE(debug)) message("Closing! \n")
       pbdZMQ::disconnect.socket(
         socket  = socket,
         address = address
@@ -145,7 +145,7 @@ server <- function(
 
   while(TRUE){
 
-    message("Waiting for an incomming message...")
+    if (isTRUE(debug)) message("Waiting for an incomming message...")
 
     # listen to ingoing message
     msg_pull <- pbdZMQ::receive.socket(socket = socket)
@@ -153,9 +153,11 @@ server <- function(
     # if (is.character(msg_pull) && msg_pull == "b") break
     # if (is.character(msg_pull) && msg_pull == "q") quit(save = "no", status = 0)
 
-    message("Message received:")
-    message("\tcommand:", msg_pull$command, "\n")
-
+    if (isTRUE(debug)) {
+      message("Message received:")
+      message("\tcommand:", msg_pull$command, "\n")
+    }
+    
     if (is.list(msg_pull)) {
       switch(
         msg_pull$command,
