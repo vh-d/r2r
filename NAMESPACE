@@ -2,8 +2,11 @@
 
 export(connect)
 export(connect_global)
+export(disconnect)
 export(do.call_remote)
 export(eval_remote)
 export(save_socket)
 export(server)
+export(start_server_locally)
 export(stop_remote)
+export(stop_server)

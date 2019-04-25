@@ -7,12 +7,13 @@
 #' @export
 connect <- function(
   address = "tcp://localhost",
-  port    = 5555
+  port    = 5555, 
+  verbose = TRUE
 ){
 
-  stopifnot(requireNamespace("pbdZMQ"))
+  stopifnot(requireNamespace("pbdZMQ", quietly = TRUE))
 
-  message("Connecting to ", paste0(address, ":", port, "..."), appendLF = FALSE)
+  if (isTRUE(verbose)) message("Connecting to ", paste0(address, ":", port, "..."), appendLF = FALSE)
 
   context = pbdZMQ::init.context()
   socket  = pbdZMQ::init.socket(context, "ZMQ_REQ")
@@ -28,6 +29,16 @@ connect <- function(
 }
 
 
+#' Destroy socket connection
+#'
+#' @param socket socket connection
+#'
+#' @export
+disconnect <- function(socket = .r2r_socket) {
+  pbdZMQ::zmq.close(socket)
+}
+
+
 #' @export
 #' @rdname connect
 save_socket <- function(socket){
@@ -35,6 +46,8 @@ save_socket <- function(socket){
 }
 
 
+#' @param ... \code{connect_global} passes args to \code{connect} 
+#'
 #' @export
 #' @rdname connect
 connect_global <- function(...){
@@ -145,6 +158,7 @@ test_remote <- function(socket = .r2r_socket) {
 #' @param socket
 #'
 #' @return
+#' @rdname connect
 #' @export
 stop_remote <- function(
   socket = .r2r_socket
@@ -173,6 +187,81 @@ break_remote <- function(socket = .r2r_socket) {
   msg_pull <- pbdZMQ::receive.socket(socket = socket)
   return(is.character(msg_pull) && msg_pull == "ok")
 }
+
+
+#' Start a new R session with a running r2r server
+#'
+#' @param address host address
+#' @param port    port
+#' @param Rscript path to Rscript binary
+#' @param args    further arguments to Rscript command (e.g. "--vanilla")
+#' @param stdout  see \code{\link{system2}}
+#' @param invisible logical; visibility of the new session window
+#'
+#' @return socket connection (invisible)
+#' @export
+#' @rdname connect
+#' @examples
+#' #TBA
+start_server_locally <- function(
+  address   = "tcp://localhost",
+  port      = pbdZMQ::random_open_port(),
+  Rscript   = NULL,
+  args      = NULL, # --vanilla
+  stdout    = NULL,
+  invisible = FALSE,
+  wait      = FALSE,
+  global    = TRUE,
+  debug     = FALSE
+) {
+  
+  if (!length(Rscript) || is.na(Rscript)) {
+    Rscript <- file.path(R.home("bin"), "Rscript")
+    if (.Platform$OS.type == "windows") Rscript <- paste0(Rscript, ".exe")
+  }
+  
+  if (isTRUE(debug)) cat("Starting new process: ", Rscript, "\n")
+  
+  stopifnot(file.exists(Rscript))
+  
+  cmd <-
+    sprintf(
+      '"library(r2r);r2r::server(port = %i, debug = %s)"', as.integer(port), as.character(debug)
+    )
+
+  if (.Platform$OS.type == "windows") {
+    system2(
+      command   = Rscript,
+      args      = c(args, "-e", cmd),
+      stdout    = stdout,
+      invisible = invisible,
+      wait      = wait
+    )
+  } else {
+    system2(
+      command   = Rscript,
+      args      = c(args, "-e", cmd),
+      stdout    = stdout,
+      wait      = wait
+    )
+  }
+  
+  socket <-
+    r2r::connect(
+      address = address,
+      port    = as.integer(port)
+    )
+
+  if (global) r2r::save_socket(socket)
+
+  return(invisible(socket))
+}
+
+
+#' @return logical
+#' @rdname connect
+#' @export
+stop_server <- stop_remote
 
 
 
