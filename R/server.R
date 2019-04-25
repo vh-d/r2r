@@ -17,8 +17,9 @@
   msg_push <-
     list(
       result  = NULL,
-      error   = NULL,
-      msg     = NULL
+      message = NULL,
+      warning = NULL,
+      error   = NULL
     )
 
   # main call
@@ -41,8 +42,6 @@
     message("\twarning:", head(msg_push$warning))
     message("\tmessage:", head(msg_push$message))
   }
-
-  if (debug) print(head(msg_push$result))
 
   if (debug) message("Sending results...", appendLF = FALSE)
 
@@ -71,7 +70,8 @@
     list(
       result  = NULL,
       error   = NULL,
-      msg     = NULL
+      warning = NULL,
+      message = NULL
     )
 
   # main call
