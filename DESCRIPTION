@@ -1,6 +1,6 @@
 Package: r2r
 Title: R-to-R client/server
-Version: 0.1.0
+Version: 0.1.1.9001
 Authors@R: 
     person(given = "Václav",
            family = "Hausenblas",
